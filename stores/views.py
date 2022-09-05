@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 import os
@@ -36,8 +37,8 @@ class ProductListView(LoginRequiredMixin, ListView):
     
     def get_context_data(self,**kwargs):
         context=super().get_context_data(**kwargs)
-        context["product_type_name"]=self.request.GET.get("product_type_name", " ")
-        context["product_name"]=self.request.GET.get("product_name", " ")
+        context["product_type_name"]=self.request.GET.get("product_type_name", "")
+        context["product_name"]=self.request.GET.get("product_name", "")
         order_by_price=self.request.GET.get("order_by_price")
         if order_by_price=="1":
             context["ascending"]=True
@@ -45,4 +46,6 @@ class ProductListView(LoginRequiredMixin, ListView):
             context["descending"]=True
         return context
         
-        
+class ProductDetailView(LoginRequiredMixin, DetailView):
+    model=Products
+    template_name=os.path.join("stores","product_detail.html")
