@@ -21,6 +21,12 @@ class Manufacturers(models.Model):
     def __str__(self):
         return self.name
 
+class ProductsManager(models.Manager):
+    def reduce_stock(self, cart):
+        for item in cart.cartitems_set.all():
+            update_stock=item.product.stock-item.quantity
+            item.product.stock=update_stock
+            item.product.save()
 
 class Products(models.Model):
     name = models.CharField(max_length=1000)
@@ -32,6 +38,7 @@ class Products(models.Model):
     manufacturer = models.ForeignKey(
         Manufacturers, on_delete=models.CASCADE
     )
+    objects=ProductsManager()
 
     class Meta:
         db_table = 'products'
@@ -102,3 +109,57 @@ class Addresses(models.Model):
         
     def __str__(self):
         return f'{self.zip_code} {self.prefecture} {self.address}'
+
+class OrdersManager(models.Manager):
+    def insert_cart(self, cart:Carts, address, total_price):
+        return self.create(
+            total_price=total_price,
+            address=address,
+            user=cart.user
+        )
+        
+class Orders(models.Model):
+    total_price=models.PositiveBigIntegerField()
+    address=models.ForeignKey(
+        Addresses,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    user=models.ForeignKey(
+        Users,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    objects=OrdersManager()
+    
+    class Meta:
+        db_table="orders"
+
+class OrderItemsManager(models.Manager):
+    def insert_cart_items(self, cart, order):
+        for item in cart.cartitems_set.all():
+            self.create(
+                quantity=item.quantity,
+                product=item.product,
+                order=order,
+            )
+
+class OrderItems(models.Model):
+    quantity=models.PositiveIntegerField()
+    product=models.ForeignKey(
+        Products,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    order=models.ForeignKey(
+        Orders,
+        on_delete=models.CASCADE,
+    )
+    objects=OrderItemsManager()
+    
+    class Meta:
+        db_table="order_items"
+        unique_together=[["product","order"]]
