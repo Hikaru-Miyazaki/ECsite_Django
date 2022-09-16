@@ -45,7 +45,7 @@ class AddressInputForm(forms.ModelForm):
                 zip_code=address.zip_code,
                 address=address.address,
             )
-        address.save()
+            pass
         cache.set(f'address_user_{self.user.id}', address)
         return address
   

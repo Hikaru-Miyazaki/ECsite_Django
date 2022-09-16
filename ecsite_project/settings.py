@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+from telnetlib import AUTHENTICATION
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
@@ -37,6 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'accounts',
     'stores',
 ]
@@ -52,6 +57,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS=(
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",   
+)
 
 ROOT_URLCONF = 'ecsite_project.urls'
 
@@ -132,3 +142,23 @@ LOGOUT_REDIRECT_URL = '/accounts/user_login'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+SITE_ID=1
+ACCOUNT_EMAIL_REQUIRED=True
+ACCOUNT_UNIQUE_EMAIL=True
+ACCOUNT_USERNAME_REQUIRED=False
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        "SCOPE":[
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS":{
+            "access_type":"online"
+        },
+    }
+}
